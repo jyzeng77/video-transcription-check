@@ -16,7 +16,17 @@ It shows the differences between the two transcriptions.
 
 ## 3 Installation
 
-### 3.1 Install Python Dependencies
+### 3.1 Quick Setup (Recommended)
+
+Run the setup script. It checks all requirements.
+
+```bash
+./setup.sh
+```
+
+### 3.2 Manual Setup
+
+#### 3.2.1 Install Python Dependencies
 
 Open a terminal.
 Move to the directory of the tool.
@@ -25,7 +35,7 @@ Move to the directory of the tool.
 pip install -r requirements.txt
 ```
 
-### 3.2 Install FFmpeg
+#### 3.2.2 Install FFmpeg
 
 OpenAI Whisper needs FFmpeg.
 
@@ -122,6 +132,8 @@ You can change this name with the `-o` option.
 
 | Problem | Solution |
 |---|---|
+| "setup.sh not found" | Move to the directory of the tool. Run `./setup.sh`. |
+| "command not found: ./setup.sh" | Run `chmod +x setup.sh` first. |
 | "video file not found" | Check that the path to the video file is correct. |
 | "existing transcription file not found" | Check that the path to the existing transcription file is correct. |
 | Whisper downloads a model each time | This is normal. The model is cached after the first download. |
