@@ -18,6 +18,8 @@ fail() {
     printf "${RED}✗${RESET} %s\n" "$1"
 }
 
+VENV_DIR="venv"
+
 echo "Video Transcription And Comparison Tool - Setup"
 echo "================================================"
 echo
@@ -41,20 +43,34 @@ else
     exit 1
 fi
 
-# Step 2: Install pip packages
+# Step 2: Create virtual environment
 echo
-echo "Step 2: Install Python packages."
-if python3 -m pip install -r requirements.txt --quiet; then
+echo "Step 2: Create virtual environment."
+if [ -d "$VENV_DIR" ]; then
+    ok "Virtual environment already exists at $VENV_DIR."
+else
+    if python3 -m venv "$VENV_DIR"; then
+        ok "Virtual environment created at $VENV_DIR."
+    else
+        fail "Failed to create virtual environment."
+        exit 1
+    fi
+fi
+
+# Step 3: Install packages in the virtual environment
+echo
+echo "Step 3: Install Python packages."
+if "$VENV_DIR/bin/pip" install -r requirements.txt --quiet; then
     ok "Packages installed."
 else
     fail "Failed to install Python packages."
-    echo "  Try: python3 -m pip install -r requirements.txt"
     exit 1
 fi
 
-# Step 3: Check FFmpeg
+#
+# Step 4: Check FFmpeg
 echo
-echo "Step 3: Check FFmpeg."
+echo "Step 4: Check FFmpeg."
 if command -v ffmpeg &>/dev/null; then
     ok "FFmpeg found at $(command -v ffmpeg)"
 else
@@ -70,5 +86,9 @@ fi
 # Done
 echo
 echo "Setup complete."
-echo "Run the tool with:"
+echo
+echo "To activate the virtual environment, run:"
+echo "  source $VENV_DIR/bin/activate"
+echo
+echo "Then run the tool with:"
 echo "  python3 main.py"

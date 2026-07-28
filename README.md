@@ -26,7 +26,14 @@ Run the setup script. It checks all requirements.
 
 ### 3.2 Manual Setup
 
-#### 3.2.1 Install Python Dependencies
+#### 3.2.1 Create A Virtual Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+#### 3.2.2 Install Python Dependencies
 
 Open a terminal.
 Move to the directory of the tool.
@@ -35,7 +42,7 @@ Move to the directory of the tool.
 pip install -r requirements.txt
 ```
 
-#### 3.2.2 Install FFmpeg
+#### 3.2.3 Install FFmpeg
 
 OpenAI Whisper needs FFmpeg.
 
