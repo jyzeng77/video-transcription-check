@@ -48,14 +48,32 @@ Add the FFmpeg `bin` folder to your PATH variable.
 
 ## 4 How To Use
 
-### 4.1 Prepare Your Files
+You can use the tool in two ways:
 
-You need:
+- **Guided mode** (recommended for new users)
+- **Command-line mode** (for experienced users)
 
-- A video file (for example, `lecture.mp4`)
-- A text file with the existing transcription (for example, `expected_transcript.txt`)
+### 4.1 Guided Mode (TUI)
 
-### 4.2 Run The Tool
+Run the tool with no arguments:
+
+```bash
+python main.py
+```
+
+The tool guides you through these steps:
+
+1. Select the video file.
+2. Select the existing transcription file.
+3. Select the Whisper model.
+4. Select the output file.
+5. Review the summary.
+6. Start the transcription.
+7. View the differences.
+
+### 4.2 Command-Line Mode
+
+Run the tool with arguments:
 
 ```bash
 python transcribe_compare.py lecture.mp4 expected_transcript.txt
