@@ -6,6 +6,8 @@ This tool transcribes a video file with OpenAI Whisper.
 It saves the new transcription to a file.
 It then compares the new transcription to an existing transcription.
 It shows the differences between the two transcriptions.
+It can optionally consolidate both transcriptions into one clean merged
+transcript with a local LLM that runs entirely on your computer.
 
 ## 2 Requirements
 
@@ -13,16 +15,25 @@ It shows the differences between the two transcriptions.
 - A computer with macOS, Linux, or Windows
 - An internet connection for the first use of Whisper
 - (Optional) A CUDA-capable GPU for faster transcription
+- (Optional) [llama.cpp](https://github.com/ggml-org/llama.cpp) and a small
+  GGUF model for the local LLM consolidation (installed by `setup.sh`)
 
 ## 3 Installation
 
 ### 3.1 Quick Setup (Recommended)
 
-Run the setup script. It checks all requirements.
+Run the setup script. It checks all requirements, installs Python packages,
+and downloads the small local LLM model used for consolidation (about 1 GB,
+downloaded once and cached on your machine).
 
 ```bash
 ./setup.sh
 ```
+
+`setup.sh` also installs [llama.cpp](https://github.com/ggml-org/llama.cpp)
+(Homebrew on macOS, prebuilt binaries elsewhere). The model download is
+optional and can be skipped if you do not plan to use the consolidation
+feature.
 
 ### 3.2 Manual Setup
 
@@ -144,13 +155,40 @@ The available styles are: `inline` (default) and `classic`.
 | `--model NAME` | Whisper model size: `tiny`, `base`, `small`, `medium`, `large` (default: `base`). |
 | `-o`, `--output PATH` | Where to save the new transcription (default: `<video_name>_transcript.txt`). |
 | `--diff-style STYLE` | How to show the differences: `inline` (default) or `classic`. |
+| `--merge` | Consolidate both transcripts into one clean merged transcript with a local LLM (default: off). |
+| `--merge-model PATH` | Path to the GGUF model for consolidation (default: the model bundled by `setup.sh`). |
+| `--merge-output PATH` | Where to save the merged transcript (default: `<video_name>_merged.txt`). |
 
 Example using every option:
 
 ```bash
 python transcribe_compare.py lecture.mp4 expected_transcript.txt \
-  --model medium -o my_output.txt --diff-style inline
+  --model medium -o my_output.txt --diff-style inline --merge
 ```
+
+### 4.7 Consolidate With A Local LLM
+
+When you pass `--merge`, the tool sends both transcripts to a small language
+model that runs entirely on your computer and produces one combined transcript.
+The model keeps the existing transcript's wording where it is correct, adopts
+the new transcription's wording where the existing one has an error or a gap,
+and fixes punctuation and formatting.
+
+```bash
+python transcribe_compare.py lecture.mp4 expected_transcript.txt --merge
+```
+
+The merged transcript is printed and saved to `<video_name>_merged.txt`
+(change it with `--merge-output`).
+
+- The bundled model is `Qwen2.5-1.5B-Instruct` (Q4, about 1 GB), downloaded
+  once by `setup.sh` and cached locally.
+- Everything runs on your machine. No data leaves your computer, and no API
+  key is needed.
+- The model is loaded for a single request and unloaded afterwards, so it uses
+  memory only while consolidating.
+- Use a different model with `--merge-model path/to/model.gguf`, or set the
+  `LLAMA_SERVER_BIN` environment variable if `llama-server` is not on your PATH.
 
 ## 5 How To Read The Differences
 
@@ -187,6 +225,9 @@ The tool creates a text file with the new transcription.
 The name of the file is `<video_name>_transcript.txt`.
 You can change this name with the `-o` option.
 
+When you pass `--merge`, it also creates `<video_name>_merged.txt` with the
+consolidated transcript (change it with `--merge-output`).
+
 ## 7 Troubleshooting
 
 | Problem | Solution |
@@ -195,6 +236,9 @@ You can change this name with the `-o` option.
 | "command not found: ./setup.sh" | Run `chmod +x setup.sh` first. |
 | "video file not found" | Check that the path to the video file is correct. |
 | "existing transcription file not found" | Check that the path to the existing transcription file is correct. |
+| "Model file not found" | Run `./setup.sh` to download the local LLM model. |
+| "llama-server was not found" | Run `./setup.sh`, or set the `LLAMA_SERVER_BIN` environment variable. |
+| "Local LLM request failed" | Make sure `llama-server` is running or that the model file is valid. |
 | Whisper downloads a model each time | This is normal. The model is cached after the first download. |
 | FFmpeg is not found | Install FFmpeg. See Section 3.2. |
 

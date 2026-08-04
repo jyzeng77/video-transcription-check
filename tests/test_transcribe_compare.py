@@ -179,6 +179,120 @@ class CliTest(unittest.TestCase):
                         tc.main()
         self.assertEqual(ctx.exception.code, 1)
 
+    def test_cli_merge_flag_reports_and_saves(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            video = os.path.join(tmp, "lecture.mp4")
+            existing = os.path.join(tmp, "expected.txt")
+            output = os.path.join(tmp, "actual.txt")
+            with open(video, "w") as f:
+                f.write("dummy video")
+            with open(existing, "w") as f:
+                f.write("hello cat\nline two")
+            with mock.patch(
+                "transcribe_compare.transcribe_video", return_value="hello dog\nline two"
+            ):
+                with mock.patch(
+                    "transcribe_compare.query_local_llm",
+                    return_value="the merged transcript",
+                ):
+                    buffer = io.StringIO()
+                    with mock.patch("sys.stdout", buffer):
+                        with mock.patch(
+                            "sys.argv",
+                            [
+                                "transcribe_compare.py",
+                                video,
+                                existing,
+                                "-o",
+                                output,
+                                "--merge",
+                            ],
+                        ):
+                            tc.main()
+            text = buffer.getvalue()
+            self.assertIn("--- Merged Transcript ---", text)
+            self.assertIn("the merged transcript", text)
+            self.assertIn("_merged.txt", text)
+            merged = os.path.join(tmp, "lecture_merged.txt")
+            self.assertTrue(os.path.exists(merged))
+            with open(merged) as f:
+                self.assertEqual(f.read().strip(), "the merged transcript")
+
+    def test_cli_no_merge_flag_does_not_consolidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            video = os.path.join(tmp, "lecture.mp4")
+            existing = os.path.join(tmp, "expected.txt")
+            with open(video, "w") as f:
+                f.write("dummy video")
+            with open(existing, "w") as f:
+                f.write("hello cat")
+            with mock.patch(
+                "transcribe_compare.transcribe_video", return_value="hello dog"
+            ):
+                with mock.patch("transcribe_compare.query_local_llm") as q:
+                    with mock.patch("sys.stdout", new=io.StringIO()):
+                        with mock.patch(
+                            "sys.argv", ["transcribe_compare.py", video, existing]
+                        ):
+                            tc.main()
+            q.assert_not_called()
+
+
+class MergePromptTest(unittest.TestCase):
+    def test_prompt_contains_both_transcripts(self):
+        prompt = tc.build_merge_prompt("old text", "new text")
+        self.assertIn("EXISTING TRANSCRIPT", prompt)
+        self.assertIn("NEW TRANSCRIPT", prompt)
+        self.assertIn("old text", prompt)
+        self.assertIn("new text", prompt)
+
+    def test_default_model_path(self):
+        self.assertTrue(
+            tc.default_model_path().endswith("qwen2.5-1.5b-instruct-q4_k_m.gguf")
+        )
+
+    def test_find_llama_server_returns_path_or_raises(self):
+        try:
+            path = tc.find_llama_server()
+            self.assertTrue(os.path.exists(path))
+        except RuntimeError:
+            pass
+
+
+class ConsolidateTest(unittest.TestCase):
+    def test_consolidate_transcripts_delegates_to_query(self):
+        with mock.patch(
+            "transcribe_compare.query_local_llm", return_value="merged"
+        ) as query:
+            result = tc.consolidate_transcripts("a", "b", "/tmp/model.gguf")
+        self.assertEqual(result, "merged")
+        query.assert_called_once()
+
+    def test_query_missing_model_raises(self):
+        with self.assertRaises(RuntimeError):
+            tc.query_local_llm("prompt", "/nonexistent/model.gguf")
+
+
+class MergeAndReportTest(unittest.TestCase):
+    def test_reports_and_saves(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = os.path.join(tmp, "merged.txt")
+            with mock.patch(
+                "transcribe_compare.consolidate_transcripts",
+                return_value="the merged text",
+            ):
+                buffer = io.StringIO()
+                with mock.patch("sys.stdout", buffer):
+                    tc.merge_and_report(
+                        "old", "new", model_path="/m.gguf", output_path=out
+                    )
+            text = buffer.getvalue()
+            self.assertIn("--- Merged Transcript ---", text)
+            self.assertIn("the merged text", text)
+            self.assertIn("saved to", text)
+            with open(out) as f:
+                self.assertEqual(f.read().strip(), "the merged text")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,7 +3,9 @@ import os
 import sys
 
 from transcribe_compare import (
+    default_model_path,
     load_transcription,
+    merge_and_report,
     save_transcription,
     show_diffs,
     transcribe_video,
@@ -90,6 +92,11 @@ def main() -> None:
     existing_text = load_transcription(existing)
 
     show_diffs(existing_text, new_text)
+
+    if confirm("Consolidate both transcripts into one with a local LLM?"):
+        default_merged = os.path.splitext(video)[0] + "_merged.txt"
+        merged_output = prompt_output(default_merged)
+        merge_and_report(existing_text, new_text, default_model_path(), merged_output)
 
     print("\nDone.")
 
