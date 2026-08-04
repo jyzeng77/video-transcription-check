@@ -123,7 +123,42 @@ You can specify a different output file:
 python transcribe_compare.py lecture.mp4 expected_transcript.txt -o my_output.txt
 ```
 
+### 4.5 Select The Diff Style
+
+By default the differences are shown inline, laid on top of each other like the
+changes view in a word processor. You can also use the classic line-by-line
+diff:
+
+```bash
+python transcribe_compare.py lecture.mp4 expected_transcript.txt --diff-style classic
+```
+
+The available styles are: `inline` (default) and `classic`.
+
 ## 5 How To Read The Differences
+
+In the default **inline** view, the changes are laid on top of each other so you
+can read the transcription naturally:
+
+- Text with **no** marker is unchanged.
+- Text in **green** with `[+ ... +]` was **added** in the new transcription.
+- Text in **red** with `[- ... -]` was **removed** from the existing
+  transcription and is shown with a strikethrough.
+
+Example:
+
+```text
+Legend: [+ added text +]  [- removed text -]
+the quick [-brown-][+red+] fox [-jumps-][+leaps+] over the [-lazy-][+sleepy+] dog
+```
+
+If a whole line was added or removed, the entire line is wrapped in the
+corresponding markers.
+
+The `[- ... -]` and `[+ ... +]` symbols are always present, so the diff stays
+readable even when colors are not supported or the output is saved to a file.
+
+In the `classic` view, lines follow the standard diff format:
 
 - Lines in **green** with a `+` are in the new transcription only.
 - Lines in **red** with a `-` are in the existing transcription only.
@@ -145,4 +180,16 @@ You can change this name with the `-o` option.
 | "existing transcription file not found" | Check that the path to the existing transcription file is correct. |
 | Whisper downloads a model each time | This is normal. The model is cached after the first download. |
 | FFmpeg is not found | Install FFmpeg. See Section 3.2. |
+
+## 8 Testing
+
+The test suite uses Python's built-in `unittest` module. No extra packages are
+needed. Run it from the project directory:
+
+```bash
+venv/bin/python -m unittest discover -s tests -v
+```
+
+The tests cover the diff logic, symbol rendering, file input/output, and the
+command-line flow (with transcription mocked out).
 
