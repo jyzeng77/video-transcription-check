@@ -19,6 +19,27 @@ STRIKETHROUGH = "\033[9m"
 
 DEFAULT_MODEL = "qwen2.5-1.5b-instruct-q4_k_m.gguf"
 MODEL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def run_with_project_venv(error_if_missing: bool = False) -> None:
+    """Re-run this script with the project virtual environment's Python.
+
+    Lets beginners run ``python3 main.py`` or ``python3 transcribe_compare.py``
+    right after ``./setup.sh`` without activating the virtual environment.
+    Advanced users can still call the venv Python directly.
+    """
+    if os.name == "nt":
+        venv_python = os.path.join(SCRIPT_DIR, "venv", "Scripts", "python.exe")
+    else:
+        venv_python = os.path.join(SCRIPT_DIR, "venv", "bin", "python3")
+    if os.path.abspath(sys.executable) == os.path.abspath(venv_python):
+        return
+    if os.path.exists(venv_python):
+        os.execv(venv_python, [venv_python] + sys.argv)
+    if error_if_missing:
+        print("Virtual environment not found. Run ./setup.sh first.", file=sys.stderr)
+        sys.exit(1)
 
 MERGE_SYSTEM_PROMPT = (
     "You are consolidating two transcripts of the same video recording. "
@@ -406,4 +427,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    run_with_project_venv()
     main()

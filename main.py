@@ -2,6 +2,10 @@
 import os
 import sys
 
+from transcribe_compare import run_with_project_venv
+
+run_with_project_venv(error_if_missing=True)
+
 from transcribe_compare import (
     default_model_path,
     load_transcription,
