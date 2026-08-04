@@ -1,212 +1,165 @@
 # Video Transcription And Comparison Tool
 
-## 1 Purpose
+## 1 What This Tool Does
 
-This tool transcribes a video file with OpenAI Whisper.
-It saves the new transcription to a file.
-It then compares the new transcription to an existing transcription.
-It shows the differences between the two transcriptions.
+This tool turns a video file into text (a transcript), then compares that new
+text with a text file you already have — for example, the transcript from a
+previous version of the video.
 
-## 2 Requirements
+It shows you exactly what changed between the two versions. If you want, it can
+also combine both versions into one clean final transcript.
 
-- Python 3.8 or later
-- A computer with macOS, Linux, or Windows
-- An internet connection for the first use of Whisper
-- (Optional) A CUDA-capable GPU for faster transcription
+## 2 Quickstart
 
-## 3 Installation
+The fastest way to start. Three steps:
 
-### 3.1 Quick Setup (Recommended)
+**Step 1 — Run the one-time setup.**
 
-Run the setup script. It checks all requirements.
+Open a terminal, go to the folder where you saved this tool, and run:
 
 ```bash
 ./setup.sh
 ```
 
-### 3.2 Manual Setup
+This checks your computer, installs what is needed, and downloads a small local
+AI model (about 1 GB, only once). The first run may take a few minutes.
 
-#### 3.2.1 Create A Virtual Environment
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-#### 3.2.2 Install Python Dependencies
-
-Open a terminal.
-Move to the directory of the tool.
+**Step 2 — Start the tool.**
 
 ```bash
-pip install -r requirements.txt
+python3 main.py
 ```
 
-#### 3.2.3 Install FFmpeg
+**Step 3 — Follow the questions on screen.**
 
-OpenAI Whisper needs FFmpeg.
+The tool will ask you for:
 
-**macOS:**
+1. Your video file
+2. Your existing transcript file
+3. Which AI model to use (press Enter to use the recommended one)
 
-```bash
-brew install ffmpeg
-```
+Then it transcribes the video, shows you the differences, and asks if you want
+to combine both transcripts into one final version.
 
-**Linux (Ubuntu or Debian):**
+That's it. You do not need to remember any commands.
 
-```bash
-sudo apt update && sudo apt install ffmpeg
-```
+## 3 What You Will See
 
-**Windows:**
+The differences are shown like "tracked changes" in a word processor:
 
-Download FFmpeg from https://ffmpeg.org/
-Add the FFmpeg `bin` folder to your PATH variable.
-
-## 4 How To Use
-
-You can use the tool in two ways:
-
-- **Guided mode** (recommended for new users)
-- **Command-line mode** (for experienced users)
-
-### 4.1 Guided Mode (TUI)
-
-Run the tool with no arguments:
-
-```bash
-python main.py
-```
-
-The tool guides you through these steps:
-
-1. Select the video file.
-2. Select the existing transcription file.
-3. Select the Whisper model.
-4. Select the output file.
-5. Review the summary.
-6. Start the transcription.
-7. View the differences.
-
-### 4.2 Command-Line Mode
-
-Run the tool with arguments:
-
-```bash
-python transcribe_compare.py lecture.mp4 expected_transcript.txt
-```
-
-The tool does these steps:
-
-1. It transcribes the video with the default model (`base`).
-2. It saves the new transcription to `lecture_transcript.txt`.
-3. It compares the new transcription to `expected_transcript.txt`.
-4. It shows the differences in the terminal.
-
-### 4.3 Select A Model
-
-You can select a different Whisper model:
-
-```bash
-python transcribe_compare.py lecture.mp4 expected_transcript.txt --model medium
-```
-
-The available models are: `tiny`, `base`, `small`, `medium`, `large`.
-
-A larger model is more accurate but takes more time.
-
-### 4.4 Select The Output File
-
-You can specify a different output file:
-
-```bash
-python transcribe_compare.py lecture.mp4 expected_transcript.txt -o my_output.txt
-```
-
-### 4.5 Select The Diff Style
-
-By default the differences are shown inline, laid on top of each other like the
-changes view in a word processor. You can also use the classic line-by-line
-diff:
-
-```bash
-python transcribe_compare.py lecture.mp4 expected_transcript.txt --diff-style classic
-```
-
-The available styles are: `inline` (default) and `classic`.
-
-### 4.6 Command-Line Options Reference
-
-| Option | Description |
-|---|---|
-| `video` | (Positional) Path to the video file to transcribe. |
-| `existing_transcription` | (Positional) Path to the existing transcription to compare against. |
-| `--model NAME` | Whisper model size: `tiny`, `base`, `small`, `medium`, `large` (default: `base`). |
-| `-o`, `--output PATH` | Where to save the new transcription (default: `<video_name>_transcript.txt`). |
-| `--diff-style STYLE` | How to show the differences: `inline` (default) or `classic`. |
-
-Example using every option:
-
-```bash
-python transcribe_compare.py lecture.mp4 expected_transcript.txt \
-  --model medium -o my_output.txt --diff-style inline
-```
-
-## 5 How To Read The Differences
-
-In the default **inline** view, the changes are laid on top of each other so you
-can read the transcription naturally:
-
-- Text with **no** marker is unchanged.
-- Text in **green** with `[+ ... +]` was **added** in the new transcription.
-- Text in **red** with `[- ... -]` was **removed** from the existing
-  transcription and is shown with a strikethrough.
+- Plain text — the same in both versions
+- Green with `[+ ... +]` — text that was added in the new version
+- Red with `[- ... -]` — text that was removed
 
 Example:
 
 ```text
-Legend: [+ added text +]  [- removed text -]
 the quick [-brown-][+red+] fox [-jumps-][+leaps+] over the [-lazy-][+sleepy+] dog
 ```
 
-If a whole line was added or removed, the entire line is wrapped in the
-corresponding markers.
+Files the tool creates:
 
-The `[- ... -]` and `[+ ... +]` symbols are always present, so the diff stays
-readable even when colors are not supported or the output is saved to a file.
+- `<video_name>_transcript.txt` — the new transcription
+- `<video_name>_merged.txt` — the combined final version (only if you choose to merge)
 
-In the `classic` view, lines follow the standard diff format:
+## 4 Set Things Up Yourself (Optional)
 
-- Lines in **green** with a `+` are in the new transcription only.
-- Lines in **red** with a `-` are in the existing transcription only.
-- Lines with no color and no `+` or `-` are equal in both transcriptions.
+Only use this if you prefer to set things up by hand instead of running
+`./setup.sh`. Otherwise, skip this section.
 
-## 6 Output
+1. Create a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
 
-The tool creates a text file with the new transcription.
-The name of the file is `<video_name>_transcript.txt`.
-You can change this name with the `-o` option.
+2. Install the Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 7 Troubleshooting
+3. Install FFmpeg (needed to transcribe audio):
+
+   - **macOS:** `brew install ffmpeg`
+   - **Linux (Ubuntu or Debian):** `sudo apt update && sudo apt install ffmpeg`
+   - **Windows:** Download FFmpeg from https://ffmpeg.org/ and add its `bin` folder to your PATH
+
+4. If you want to use the merge feature, install
+   [llama.cpp](https://github.com/ggml-org/llama.cpp) and download a GGUF model
+   into the `models` folder. `setup.sh` does this for you automatically.
+
+## 5 Using The Tool
+
+### 5.1 Guided Mode (for everyone)
+
+Start the tool with no arguments:
+
+```bash
+python3 main.py
+```
+
+It guides you through each step by asking questions. This is the easiest way to
+use the tool.
+
+### 5.2 Command-Line Mode (for those who like typing)
+
+You can do the whole thing in one command:
+
+```bash
+python3 transcribe_compare.py lecture.mp4 expected_transcript.txt
+```
+
+This transcribes `lecture.mp4`, saves the new text to
+`lecture_transcript.txt`, and compares it with `expected_transcript.txt`.
+
+### 5.3 Combine Two Transcripts
+
+To get one clean final transcript from both versions, add `--merge`:
+
+```bash
+python3 transcribe_compare.py lecture.mp4 expected_transcript.txt --merge
+```
+
+The combined transcript is printed and saved to `lecture_merged.txt`.
+
+Everything runs on your computer. No data leaves your machine, and no API key
+is needed. The bundled model (`Qwen2.5-1.5B`) is downloaded once by
+`setup.sh` and is only in memory while it works.
+
+### 5.4 All Command-Line Options
+
+| Option | What it does |
+|---|---|
+| `video` | The video file to transcribe. |
+| `existing_transcription` | The existing transcript to compare against. |
+| `--model NAME` | Which transcription model to use: `tiny`, `base`, `small`, `medium`, `large` (default: `base`). |
+| `-o`, `--output PATH` | Where to save the new transcript (default: `<video_name>_transcript.txt`). |
+| `--diff-style STYLE` | How to show changes: `inline` (default) or `classic`. |
+| `--merge` | Combine both transcripts into one final version. |
+| `--merge-model PATH` | The local model file to use for merging (default: the one from `setup.sh`). |
+| `--merge-output PATH` | Where to save the merged transcript (default: `<video_name>_merged.txt`). |
+
+## 6 Troubleshooting
 
 | Problem | Solution |
 |---|---|
-| "setup.sh not found" | Move to the directory of the tool. Run `./setup.sh`. |
+| "setup.sh not found" | Move to the folder where the tool is saved, then run `./setup.sh`. |
 | "command not found: ./setup.sh" | Run `chmod +x setup.sh` first. |
-| "video file not found" | Check that the path to the video file is correct. |
-| "existing transcription file not found" | Check that the path to the existing transcription file is correct. |
-| Whisper downloads a model each time | This is normal. The model is cached after the first download. |
-| FFmpeg is not found | Install FFmpeg. See Section 3.2. |
+| "video file not found" | Check that the path to your video file is correct. |
+| "existing transcription file not found" | Check that the path to your transcript file is correct. |
+| "Model file not found" | Run `./setup.sh` to download the local AI model. |
+| "llama-server was not found" | Run `./setup.sh`, or set the `LLAMA_SERVER_BIN` environment variable. |
+| "Local LLM request failed" | Make sure the local model file is valid. |
+| Whisper downloads a model each time | This is normal. It is cached after the first download. |
+| FFmpeg is not found | Install FFmpeg (see Section 4). |
 
-## 8 Testing
+## 7 Testing
 
-The test suite uses Python's built-in `unittest` module. No extra packages are
-needed. Run it from the project directory:
+To run the automated tests, use:
 
 ```bash
 venv/bin/python -m unittest discover -s tests -v
 ```
 
-The tests cover the diff logic, symbol rendering, file input/output, and the
-command-line flow (with transcription mocked out).
-
+The tests check the comparison logic, the output files, and the command-line
+flow.
