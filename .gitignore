@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 models/
 bin/
+*_transcript.txt
+*_merged.txt
+transcript.txt
