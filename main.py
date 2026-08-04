@@ -3,10 +3,9 @@ import os
 import sys
 
 from transcribe_compare import (
-    highlight_diffs,
     load_transcription,
-    print_colored_diff,
     save_transcription,
+    show_diffs,
     transcribe_video,
 )
 
@@ -90,13 +89,7 @@ def main() -> None:
 
     existing_text = load_transcription(existing)
 
-    print("\n--- Differences ---")
-    diff_text = highlight_diffs(existing_text, new_text)
-
-    if not diff_text:
-        print("No differences found.")
-    else:
-        print_colored_diff(diff_text)
+    show_diffs(existing_text, new_text)
 
     print("\nDone.")
 
