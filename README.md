@@ -181,3 +181,15 @@ You can change this name with the `-o` option.
 | Whisper downloads a model each time | This is normal. The model is cached after the first download. |
 | FFmpeg is not found | Install FFmpeg. See Section 3.2. |
 
+## 8 Testing
+
+The test suite uses Python's built-in `unittest` module. No extra packages are
+needed. Run it from the project directory:
+
+```bash
+venv/bin/python -m unittest discover -s tests -v
+```
+
+The tests cover the diff logic, symbol rendering, file input/output, and the
+command-line flow (with transcription mocked out).
+
