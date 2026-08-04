@@ -171,8 +171,5 @@ fi
 echo
 echo "Setup complete."
 echo
-echo "To activate the virtual environment, run:"
-echo "  source $VENV_DIR/bin/activate"
-echo
-echo "Then run the tool with:"
+echo "Run the tool with:"
 echo "  python3 main.py"
