@@ -49,8 +49,9 @@ MERGE_SYSTEM_PROMPT = (
     "as the base: keep its wording and formatting where it is correct, and only "
     "adopt the NEW transcript's wording where the existing one has an error, a "
     "gap, or a missing or extra word. Fix punctuation, capitalization, and "
-    "paragraph breaks for readability. Do not add commentary, notes, or "
-    "explanations. Output only the merged transcript."
+    "line breaks. Use line breaks and paragraph breaks largely based on the "
+    "EXISTING transcript, and add additional breaks where natural. Do not add "
+    "commentary, notes, or explanations. Output only the merged transcript."
 )
 
 
@@ -420,6 +421,8 @@ def main() -> None:
     existing_text = load_transcription(args.existing_transcription)
 
     show_diffs(existing_text, new_text, args.diff_style)
+
+    print("\n")
 
     if args.merge:
         merge_output = args.merge_output or os.path.splitext(args.video)[0] + "_merged.txt"

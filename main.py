@@ -97,6 +97,8 @@ def main() -> None:
 
     show_diffs(existing_text, new_text)
 
+    print("\n")
+
     if confirm("Consolidate both transcripts into one with a local LLM?"):
         default_merged = os.path.splitext(video)[0] + "_merged.txt"
         merged_output = prompt_output(default_merged)
