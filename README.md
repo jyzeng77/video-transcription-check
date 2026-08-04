@@ -135,6 +135,23 @@ python transcribe_compare.py lecture.mp4 expected_transcript.txt --diff-style cl
 
 The available styles are: `inline` (default) and `classic`.
 
+### 4.6 Command-Line Options Reference
+
+| Option | Description |
+|---|---|
+| `video` | (Positional) Path to the video file to transcribe. |
+| `existing_transcription` | (Positional) Path to the existing transcription to compare against. |
+| `--model NAME` | Whisper model size: `tiny`, `base`, `small`, `medium`, `large` (default: `base`). |
+| `-o`, `--output PATH` | Where to save the new transcription (default: `<video_name>_transcript.txt`). |
+| `--diff-style STYLE` | How to show the differences: `inline` (default) or `classic`. |
+
+Example using every option:
+
+```bash
+python transcribe_compare.py lecture.mp4 expected_transcript.txt \
+  --model medium -o my_output.txt --diff-style inline
+```
+
 ## 5 How To Read The Differences
 
 In the default **inline** view, the changes are laid on top of each other so you
